@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 
 
-
 def identify_number_categories(df):
     """
     This definition can be used to identify the number of categories of every categorical feature 
