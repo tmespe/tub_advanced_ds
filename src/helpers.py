@@ -34,6 +34,7 @@ def one_hot(df, categorical_cols):
     
     for c in categorical_cols:
         dummies = pd.get_dummies(df[c], prefix=c)
+        # dummies = pd.get_dummies(df[c], prefix=c, drop_first=True) - you can also remove one of the one hot encoded dummy vars
         df = pd.concat([df, dummies], axis=1)
         df.drop(c, axis = 1, inplace = True)
     
@@ -107,3 +108,16 @@ def identify_missing_data(df):
     missing_value_df.percent_missing = round(missing_value_df.percent_missing*100, 2) # format the percent_missing
     
     return missing_value_df
+
+
+def feature_importance_plot(model, X_train, n):
+    """Plots feature importance - this only works for Decision Tree based Models"""
+    plt.figure(figsize=(8, 5)) # set figure size
+    feat_importances = pd.Series(model.feature_importances_,
+                                 index = X_train.columns)
+    feat_importances.nlargest(n).plot(kind = 'bar')
+    plt.title(f"Top {n} Features")
+    plt.show()
+    
+
+
