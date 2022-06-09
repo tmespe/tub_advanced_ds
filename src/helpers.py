@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 def identify_number_categories(df):
     """
@@ -117,6 +117,7 @@ def feature_importance_plot(model, X_train, n):
                                  index = X_train.columns)
     feat_importances.nlargest(n).plot(kind = 'bar')
     plt.title(f"Top {n} Features")
+    plt.xticks(rotation=45)
     plt.show()
     
 
