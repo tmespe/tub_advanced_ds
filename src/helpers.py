@@ -56,11 +56,15 @@ def identify_highly_correlated_features(df, correlation_threshold):
     high_corr_var = [(corr_matrix.index[x], corr_matrix.columns[y], round(corr_matrix.iloc[x, y], 2))
                          for x, y in zip(*high_corr_var) if x != y and x < y] # identify pairs of highly correlated variables
     
-    high_corr_var_df = pd.DataFrame(high_corr_var).rename(columns = {0: 'corr_feature',
+    if high_corr_var != []:
+        high_corr_var_df = pd.DataFrame(high_corr_var).rename(columns = {0: 'corr_feature',
                                                                      1: 'drop_feature',
                                                                      2: 'corrrelation_values'})
-
-    return high_corr_var_df.sort_values(by = 'corrrelation_values', ascending = False)
+        high_corr_var_df = high_corr_var_df.sort_values(by = 'corrrelation_values', ascending = False)
+    else:
+        high_corr_var_df = print("there are no pairs of correlations with that threshold")
+        
+    return high_corr_var_df
 
 
 def identify_low_variance_features(df, std_threshold):
