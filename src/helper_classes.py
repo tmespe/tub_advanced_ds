@@ -1,4 +1,5 @@
 from tabnanny import verbose
+from typing import List
 import matplotlib.pyplot
 import pandas as pd
 import numpy as np
@@ -162,13 +163,26 @@ class EDA:
         :return:
         """
         if self.target_type == "cat":
-            return px.bar(self.df[self.target_name].value_counts(),
-                          title="Distribution of categorical target variable", text=self.target_var.value_counts())
+            fig = px.bar(self.df[self.target_name].value_counts(),
+                          title="Distribution of categorical target variable", text=self.df[self.target_name].value_counts(),
+                          color=self.df[self.target_name].value_counts(),  
+                          labels={"value": "Count", "index": "Category"},  # Change x and y label from default to something more meaningful
+                          ) 
+            fig.update_coloraxes(showscale=False)  # Hide unnecessary color scale
+            return fig
             #self.target_var.value_counts().plot(kind="bar")
         else:
-            return px.histogram(self.target_var, title="Histogram of target variable", color=self.target_var)
+            return px.histogram(self.target_var, title="Histogram of target variable")
 
-    def plot_target_corr(self, cols=None):
+    def plot_target_corr(self, cols : List = None) -> px.imshow:
+        """Plots correlations between target column and passed columns. If no columns
+        are passed plots target against all other columns.
+
+        :param cols: List of columns to plot target against, defaults to None
+        :type cols: List, optional
+        :return: Plotly imshow correlation heatmap
+        :rtype: px.imshow
+        """
         if not cols:  # If no columns passed plot correlations for all variables
             return px.imshow(self.correlations(), title="Correlations between target and all columns", text_auto=True)
         else:
@@ -187,12 +201,17 @@ class EDA:
         except TypeError as e:
             raise TypeError("No categorical variables")
 
-    def remove_cats(self, n_cats):
-        num_cats = self.num_cats()
+    # def remove_cats(self, n_cats):
+    #     num_cats = self.num_cats()
 
-        print(num_cats > n_cats)
+    #     print(num_cats > n_cats)
 
-    def correlations(self):
+    def correlations(self) -> pd.DataFrame:
+        """Gets rounded correlations for dataframe
+
+        :return: Rounded correalation matrix
+        :rtype: Dataframe
+        """
         return self.df_clean.corr().round(2)
 
     def remove_highly_corr(self, threshhold: float = 0.6, exclude:  list=[]) -> pd.DataFrame:
@@ -210,8 +229,14 @@ class EDA:
 
         self.df_clean = self.df_clean.drop(columns=unique_corrs)
         return self.df_clean
+        #return corr_filter.index.get_level_values(0).join(corr_filter.index.get_level_values(1))
 
-    def plot_heatmap(self):
+    def plot_heatmap(self) -> px.imshow:
+        """Plots heatmap of all feature correlations
+
+        :return: Heatmap of all feature correlations
+        :rtype: px.imshow 
+        """
         correlations = self.correlations()
 
         return px.imshow(correlations, text_auto=True, title="Heatmap of feature correlations")
@@ -233,7 +258,14 @@ class EDA:
 
         return pct_missing_df
 
-    def remove_missing_data(self, threshold=0.6):
+    def remove_missing_data(self, threshold: float =0.6) -> pd.DataFrame:
+        """Removes columns with missing data over threshold
+
+        :param threshold: Threshhold of missing of which to remove columns, defaults to 0.6
+        :type threshold: float, optional
+        :return: Pandas dataframe with removed columns that have missing data above threshold
+        :rtype: pd.dataframe
+        """
         df_missing = self.identify_missing_data()
         missing_cols = df_missing[df_missing["percent_missing"] >= threshold].index.to_list()
 
@@ -242,6 +274,13 @@ class EDA:
 
     @staticmethod
     def check_extension(file: str) -> str:
+        """Returns file extension
+
+        :param file: Path to file
+        :type file: str
+        :return: File extension
+        :rtype: str
+        """
         try:
             return Path(file).suffix
         except FileNotFoundError as e:
